@@ -1,5 +1,3 @@
-#Instruction
-
 1. Put following link into ArduinoIDE clicking File > Preferences > Additional boards manager URLs:
 http://arduino.esp8266.com/stable/package_esp8266com_index.json
 

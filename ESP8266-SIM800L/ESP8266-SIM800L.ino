@@ -6,7 +6,7 @@
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
 
-#define SIM800_TX_PIN 0 // D3 (D3 should be connected to TX (TX is right next to the GND pin at SIM800L module)
+#define SIM800_TX_PIN 0 // D3 (D3 should be connected to TX (TX is right next to the GND pin at SIM800L module))
 #define SIM800_RX_PIN 2 // D4 
 
 SoftwareSerial sim800(SIM800_TX_PIN, SIM800_RX_PIN);
@@ -20,14 +20,14 @@ ESP8266WiFiMulti WiFiMulti;
 
 bool SerialMonitorEnabled = true;
 bool LCDFeatureEnabled = true;
-String connectionType = "client/server"; // Available options: client/server (p2p will be available in the future)
-String csaServerHostname = "192.168.0.100"; // Fill only if client/server (ip/domain names allowed)
+String connectionType = "client/server"; // Available options: client/server (p2p [probably] will be available in the future)
+String csaServerHostname = "192.168.0.1"; // Fill only if client/server (ip/domain names allowed)
 String csaServerProtocol = "http"; // Fill only if client/server
 String csaServerApiToken = "ABCDEFGHIJKLMNOPQRSTUWXYZ1234567"; // Fill only if client/server
 
 // Connect to wifi that has internet access OR is in the same LAN where the OpenSMS Server is.
 const char* WiFiSSID = "TestTest"; 
-const char* WiFiPassword = "TestTest1";
+const char* WiFiPassword = "TestTest123";
 const uint32_t WiFiTimeout = 20000; // Timeout time (it is recommended to be greather than 1000)
 
 /**
@@ -48,7 +48,7 @@ void setup() {
   delay(1000);
 
   if(LCDFeatureEnabled){
-    Wire.begin(4, 5); //SDA, SCL
+    Wire.begin(4, 5); //SDA = D, SCL
   }
 
   if(SerialMonitorEnabled){
