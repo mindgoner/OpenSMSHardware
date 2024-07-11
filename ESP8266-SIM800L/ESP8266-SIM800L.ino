@@ -5,6 +5,12 @@
 
 SoftwareSerial sim800(SIM800_TX_PIN, SIM800_RX_PIN);
 
+bool commandFirstSuccess = false;
+bool commandSecondSuccess = false;
+bool commandThirdSuccess = false;
+bool networkRegisterSuccess = false;
+bool signalStrengthSuccess = false;
+
 void setup() {
   delay(1000);
 
@@ -13,21 +19,43 @@ void setup() {
   
   Serial.println("Initializing SIM800...");
 
-  sendCommand("AT", "OK", 2000);
-  sendCommand("AT+CSCS=\"GSM\"", "OK", 2000);
-  sendCommand("AT+CMGF=1", "OK", 2000);
 
-  checkNetworkRegistration();
-  checkSignalStrength();
+  while (!commandFirstSuccess) {
+    commandFirstSuccess = sendCommand("AT", "OK", 2000);
+  }
+  Serial.print("AT test passed!\n");
 
-  sendSMS("TYPE_NUMBER_HERE", "ok");
+  while (!commandSecondSuccess) {
+    commandSecondSuccess = sendCommand("AT+CSCS=\"GSM\"", "OK", 2000);
+  }
+  Serial.print("AT+CSCS test passed!\n");
+
+  while (!commandThirdSuccess) {
+    commandThirdSuccess = sendCommand("AT+CMGF=1", "OK", 2000);
+  }
+  Serial.print("AT+CMGF test passed!\n");
+
+  while (!networkRegisterSuccess) {
+    networkRegisterSuccess = checkNetworkRegistration();
+  }
+  Serial.print("Network Registered test passed!\n");
+
+  while (!signalStrengthSuccess) {
+    signalStrengthSuccess = checkSignalStrength();
+  }
+  Serial.print("Signal Strength test passed!\n");
+
+
+  //sendSMS("+1123123123", "System Booted");
 }
 
 void loop() {
-  // Nothing to do here
+  while(1==1){
+    delay(1000);
+  }
 }
 
-void sendCommand(const char* cmd, const char* ack, unsigned int timeout) {
+bool sendCommand(const char* cmd, const char* ack, unsigned int timeout) {
   Serial.print("Sending command: ");
   Serial.println(cmd);
   
@@ -38,15 +66,16 @@ void sendCommand(const char* cmd, const char* ack, unsigned int timeout) {
       if (sim800.find(ack)) {
         Serial.print("Command executed successfully: ");
         Serial.println(cmd);
-        return;
+        return true;
       }
     }
     Serial.print("Command timed out: ");
     Serial.println(cmd);
   }
+  return false;
 }
 
-void checkNetworkRegistration() {
+bool checkNetworkRegistration() {
   Serial.println("Checking network registration...");
   sim800.println("AT+CREG?");
   unsigned long start = millis();
@@ -55,15 +84,16 @@ void checkNetworkRegistration() {
       String response = sim800.readString();
       Serial.println("Network registration response: " + response);
       if (response.indexOf("+CREG: 0,1") > -1 || response.indexOf("+CREG: 0,5") > -1) {
-        Serial.println("Module is registered to the network.");
-        return;
+        //Serial.println("Module is registered to the network.");
+        return true;
       }
     }
   }
   Serial.println("Module failed to register to the network.");
+  return false;
 }
 
-void checkSignalStrength() {
+bool checkSignalStrength() {
   Serial.println("Checking signal strength...");
   sim800.println("AT+CSQ");
   unsigned long start = millis();
@@ -79,12 +109,16 @@ void checkSignalStrength() {
         } else {
           Serial.print("Signal strength (RSSI): ");
           Serial.println(rssi);
+          if(rssi > 10){
+            return true;
+          }
         }
-        return;
+        return false;
       }
     }
   }
   Serial.println("Failed to get signal strength.");
+  return false;
 }
 
 void sendSMS(const char* number, const char* text) {
